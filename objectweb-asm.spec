@@ -35,7 +35,7 @@
 
 Name:           %{?scl_prefix}objectweb-asm
 Version:        3.3.1
-Release:        8.4%{?dist}
+Release:        8.2%{?dist}
 Epoch:          0
 Summary:        A code manipulation tool to implement adaptable systems
 License:        BSD
@@ -44,8 +44,8 @@ Source0:        http://download.forge.objectweb.org/asm/asm-3.3.1.tar.gz
 
 BuildArch:      noarch
 
-BuildRequires:  maven30-ant
-BuildRequires:  maven30-maven-local
+BuildRequires:  ant
+BuildRequires:  maven-local
 
 %description
 ASM is an all purpose Java bytecode manipulation and analysis
@@ -61,7 +61,7 @@ Summary:        API documentation for %{name}
 This package provides %{summary}.
 
 %prep
-%{?scl:scl enable maven30 %{scl} - << "EOF"}
+%{?scl:scl enable %{scl} - << "EOF"}
 %setup -q -n asm-%{version}
 find -name *.jar -delete
 %mvn_alias :asm-all org.eclipse.jetty.orbit:org.objectweb.asm
@@ -70,38 +70,27 @@ sed -i /Class-path/d archive/asm-xml.xml
 %{?scl:EOF}
 
 %build
-%{?scl:scl enable maven30 %{scl} - << "EOF"}
+%{?scl:scl enable %{scl} - << "EOF"}
 %ant -Dobjectweb.ant.tasks.path= jar jdoc
 %{?scl:EOF}
 
 %install
-%{?scl:scl enable maven30 %{scl} - << "EOF"}
+%{?scl:scl enable %{scl} - << "EOF"}
 for m in asm asm-analysis asm-commons asm-tree asm-util asm-xml all/asm-all; do
     %mvn_artifact output/dist/lib/${m}-%{version}.pom \
                   output/dist/lib/${m}-%{version}.jar
 done
 %mvn_install -J output/dist/doc/javadoc/user
-# Own the objectweb-asm directory in order to avoid it sticking
-# around after removal
-install -d -m 755 %{buildroot}%{_javadir}/%{pkg_name}
 %{?scl:EOF}
 
 %files -f .mfiles
 %doc LICENSE.txt README.txt
-# Own the objectweb-asm directory in order to avoid it sticking
-# around after removal
-%dir %{_javadir}/%{pkg_name}
+%dir %{_javadir}/%{name}
 
 %files javadoc -f .mfiles-javadoc
 %doc LICENSE.txt
 
 %changelog
-* Fri Jun 20 2014 Severin Gehwolf <sgehwolf@redhat.com> - 0:3.3.1-8.4
-- Own objectweb-asm directory.
-
-* Tue Jun 17 2014 Severin Gehwolf <sgehwolf@redhat.com> - 0:3.3.1-8.3
-- Rebuild against maven30 collection.
-
 * Mon Jan 20 2014 Severin Gehwolf <sgehwolf@redhat.com> - 0:3.3.1-8.2
 - Rebuild in order to fix osgi()-style provides.
 - Resolves: RHBZ#1054813
